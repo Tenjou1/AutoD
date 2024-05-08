@@ -7,6 +7,7 @@ export default function CreateEntrezCours({ navigation }) {
   const [quizTitle, setQuizTitle] = useState('');
   const [category, setCategory] = useState('');
   const [course, setCourse] = useState(null); // Changez la valeur initiale pour gérer les documents
+  const [courseContent, setCourseContent] = useState(''); // Ajoutez l'état pour le contenu du cours
 
   // Ajoutez une fonction pour choisir un document PDF
   const pickDocument = async () => {
@@ -27,6 +28,15 @@ export default function CreateEntrezCours({ navigation }) {
   return (
     <View style={styles.container}>
       <Button title="Ajouter un cours" onPress={pickDocument} />
+      <TextInput
+        multiline
+        numberOfLines={4}
+        maxLength={1500} // Limitez le contenu à 1500 caractères
+        placeholder="Entrez le contenu de votre cours ici"
+        value={courseContent}
+        onChangeText={setCourseContent} // Mettez à jour l'état du contenu du cours
+        style={styles.input}
+      />
       <Button title="Suivant" onPress={() => navigation.navigate('FormatSelection')} />
       {/* Affichez le nom du fichier PDF sélectionné si disponible */}
       {course && <Text>{course.name}</Text>}
@@ -40,5 +50,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+  },
+  input: {
+    height: 200,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginVertical: 20,
+    padding: 10,
+    textAlignVertical: 'top', // Alignez le texte en haut de la zone de texte
+    width: '100%',
   },
 });
