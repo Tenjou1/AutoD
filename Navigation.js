@@ -1,10 +1,10 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Connexion from './Connexion';
-import EntrezCours from './EntrezCours';
-import FormatSelection from './FormatSelection';
-import Menu from './Menu';
-import InterfaceQuestion from './InterfaceQuestion';
+import Connexion from './Screens/Connexion';
+import EntrezCours from './Screens/EntrezCours';
+import FormatSelection from './Screens/FormatSelection';
+import Menu from './Screens/Menu';
+import InterfaceQuestion from './Screens/InterfaceQuestion';
 
 const Stack = createNativeStackNavigator();
 
