@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import axios from 'axios';
+import DataContext, { DataProvider } from '../src/context/DataContext';
 
 export default function QuizFormatSelectionScreen({ navigation }) {
   const [selectedFormat, setSelectedFormat] = useState(null);
+  const { data, setData } = useContext(DataContext);
 
   const formats = [
     { key: 'multiple', text: 'Questions à choix multiples' },
@@ -15,44 +18,52 @@ export default function QuizFormatSelectionScreen({ navigation }) {
     { key: 'mix', text: 'Mix' },
   ];
 
-const handleSelectFormat = (format) => {
-  setSelectedFormat(format);
-  
-  // Déterminer l'écran de destination basé sur le format sélectionné
-  let screenName;
-  switch (format) {
-    case 'multiple':
-      screenName = 'InterfaceQuestion'; // Remplacez par le nom de votre écran pour ce format
-      break;
-    case 'single':
-      screenName = 'SingleChoiceScreen'; // Ajustez selon vos écrans
-      break;
-    case 'fill':
-      screenName = 'FillBlanksScreen';
-      break;
-    case 'revision':
-      screenName = 'RevisionScreen';
-      break;
-    case 'flashcards':
-      screenName = 'FlashcardsScreen';
-      break;
-    case 'exercises':
-      screenName = 'ExercisesScreen';
-      break;
-    case 'audio':
-      screenName = 'AudioSummaryScreen';
-      break;
-    case 'mix':
-      screenName = 'MixedFormatScreen';
-      break;
-    default:
-      screenName = 'HomeScreen'; // Écran par défaut si aucun format n'est reconnu
-  }
+  const handleSelectFormat = async (format) => {
+    setSelectedFormat(format);
+    const requestData = { ...data, format };
 
-  // Naviguer vers l'écran sélectionné
-  navigation.navigate(screenName);
-};
-
+    try {
+      const response = await axios.post('https://yourapi.com/endpoint', requestData);
+      if (response.status === 200) {
+        Alert.alert('Succès', 'Le cours a été enregistré avec succès.');
+        let screenName;
+        switch (format) {
+          case 'multiple':
+            screenName = 'InterfaceQuestion';
+            break;
+          case 'single':
+            screenName = 'SingleChoiceScreen';
+            break;
+          case 'fill':
+            screenName = 'FillBlanksScreen';
+            break;
+          case 'revision':
+            screenName = 'RevisionScreen';
+            break;
+          case 'flashcards':
+            screenName = 'FlashcardsScreen';
+            break;
+          case 'exercises':
+            screenName = 'ExercisesScreen';
+            break;
+          case 'audio':
+            screenName = 'AudioSummaryScreen';
+            break;
+          case 'mix':
+            screenName = 'MixedFormatScreen';
+            break;
+          default:
+            screenName = 'HomeScreen';
+        }
+        navigation.navigate(screenName);
+      } else {
+        Alert.alert('Erreur', 'Une erreur est survenue lors de l\'enregistrement du cours.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi des données', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi des données. Veuillez réessayer.');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -95,11 +106,11 @@ const styles = StyleSheet.create({
   formatButton: {
     padding: 20,
     margin: 5,
-    width: '45%', // Approximately 2 columns on the screen
+    width: '45%',
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    elevation: 2, // Shadow for Android
-    shadowColor: '#000000', // Shadow for iOS
+    elevation: 2,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

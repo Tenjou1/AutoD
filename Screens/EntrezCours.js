@@ -1,63 +1,122 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker'; // Importez DocumentPicker
+import React, { useState, useContext } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import axios from 'axios';
+import DataContext, { DataProvider } from '../src/context/DataContext';
 
-export default function CreateEntrezCours({ navigation }) {
-  const [image, setImage] = useState(null);
-  const [quizTitle, setQuizTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [course, setCourse] = useState(null); // Changez la valeur initiale pour gérer les documents
-  const [courseContent, setCourseContent] = useState(''); // Ajoutez l'état pour le contenu du cours
+export default function QuizFormatSelectionScreen({ navigation }) {
+  const [selectedFormat, setSelectedFormat] = useState(null);
+  const { data, setData } = useContext(DataContext);
 
-  // Ajoutez une fonction pour choisir un document PDF
-  const pickDocument = async () => {
-    let result = await DocumentPicker.getDocumentAsync({
-      type: 'application/pdf', // Assurez-vous de limiter le type à PDF
-      copyToCacheDirectory: true, // Optionnel: Copie le fichier dans le cache de l'app
-    });
-    if (result.type === 'success') {
-      setCourse(result); // Stockez le résultat du document choisi
+  const formats = [
+    { key: 'multiple', text: 'Questions à choix multiples' },
+    { key: 'single', text: 'Questions à choix unique' },
+    { key: 'fill', text: 'Textes à trou' },
+    { key: 'revision', text: 'Fiches de révision' },
+    { key: 'flashcards', text: 'Flashcards' },
+    { key: 'exercises', text: 'Exercices' },
+    { key: 'audio', text: 'Résumés audios' },
+    { key: 'mix', text: 'Mix' },
+  ];
+
+  const handleSelectFormat = async (format) => {
+    setSelectedFormat(format);
+    const requestData = { ...data, format };
+
+    try {
+      const response = await axios.post('https://yourapi.com/endpoint', requestData);
+      if (response.status === 200) {
+        Alert.alert('Succès', 'Le cours a été enregistré avec succès.');
+        let screenName;
+        switch (format) {
+          case 'multiple':
+            screenName = 'InterfaceQuestion';
+            break;
+          case 'single':
+            screenName = 'SingleChoiceScreen';
+            break;
+          case 'fill':
+            screenName = 'FillBlanksScreen';
+            break;
+          case 'revision':
+            screenName = 'RevisionScreen';
+            break;
+          case 'flashcards':
+            screenName = 'FlashcardsScreen';
+            break;
+          case 'exercises':
+            screenName = 'ExercisesScreen';
+            break;
+          case 'audio':
+            screenName = 'AudioSummaryScreen';
+            break;
+          case 'mix':
+            screenName = 'MixedFormatScreen';
+            break;
+          default:
+            screenName = 'HomeScreen';
+        }
+        navigation.navigate(screenName);
+      } else {
+        Alert.alert('Erreur', 'Une erreur est survenue lors de l\'enregistrement du cours.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi des données', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi des données. Veuillez réessayer.');
     }
   };
 
-  const handleSubmit = () => {
-    // Submit data and navigate
-    // Assurez-vous d'inclure le traitement pour le fichier PDF sélectionné en plus des autres données
-  };
-
   return (
-    <View style={styles.container}>
-      <Button title="Ajouter un cours" onPress={pickDocument} />
-      <TextInput
-        multiline
-        numberOfLines={4}
-        maxLength={1500} // Limitez le contenu à 1500 caractères
-        placeholder="Entrez le contenu de votre cours ici"
-        value={courseContent}
-        onChangeText={setCourseContent} // Mettez à jour l'état du contenu du cours
-        style={styles.input}
-      />
-      <Button title="Suivant" onPress={() => navigation.navigate('FormatSelection')} />
-      {/* Affichez le nom du fichier PDF sélectionné si disponible */}
-      {course && <Text>{course.name}</Text>}
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Choisissez le format</Text>
+      <View style={styles.formatContainer}>
+        {formats.map((format) => (
+          <TouchableOpacity
+            key={format.key}
+            style={[
+              styles.formatButton,
+              { backgroundColor: selectedFormat === format.key ? '#DDEEFF' : '#FFFFFF' }
+            ]}
+            onPress={() => handleSelectFormat(format.key)}
+          >
+            <Text style={styles.formatText}>{format.text}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
   },
-  input: {
-    height: 200,
-    borderColor: 'gray',
-    borderWidth: 1,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
     marginVertical: 20,
-    padding: 10,
-    textAlignVertical: 'top', // Alignez le texte en haut de la zone de texte
+  },
+  formatContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  formatButton: {
+    padding: 20,
+    margin: 5,
+    width: '45%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    alignItems: 'center',
+  },
+  formatText: {
+    textAlign: 'center',
   },
 });
